@@ -1,0 +1,39 @@
+site_no,type,label,startDate,endDate,lat,lng
+"""02130900""",stream,Black Crk nr McBee,',,34.51404244,-80.1831244
+"""02136000""",stream,Black Rvr @ Kingstree,',',33.66127545,-79.83590448
+"""02156500""",stream,Broad nr Carlisle,',',34.5951393,-81.4212089
+"""02167582""",stream,Bush nr Prosperity,',',34.1687501,-81.61038399
+"""02147020""",stream,Catawba Below Catawba,',',34.83625705,-80.879518
+"""02177000""",stream,Chattooga nr Clayton,',',34.8139814,-83.305993
+"""02176500""",stream,Coosawhatchie nr Hampton,',',32.8362777,-81.1317718
+"""02175000""",stream,Edisto nr Givhans,',',33.02794645,-80.3914876
+"""02160700""",stream,Enoree @ Whitmire,',',34.5093039,-81.5981594
+"""02169570""",stream,Gills Crk @ Columbia,',',33.98960016,-80.9742573
+"""02135000""",stream,Little Pee Dee @ Galivants Ferry,',',34.05710829,-79.2469897
+"""02192500""",stream,Little River nr Mt Carmel,',',34.07150595,-82.5006853
+"""02132000""",stream,Lynches @ Effingham,',',34.05154846,-79.7539545
+"""02172300""",stream,Mctier Crk Nr Monetta,',',33.75347736,-81.6017714
+"""02162350""",stream,Middle Saluda nr Cleveland,',',35.1201172,-82.537623
+"""02173500""",stream,North Fork Edisto @ Orangeburg,',',33.48348715,-80.87342578
+"""02154500""",stream,North Pacolet @ Fingerville,',',35.12095166,-81.9859403
+"""02131000""",stream,Pee Dee @ Peedee,',',34.20432518,-79.5483896
+"""02147500""",stream,Rocky Crk @ Great Falls,',',34.5654221,-80.9198025
+"""02187910""",stream,Rocky Rvr nr Starr,',',34.38316394,-82.577352
+"""02175500""",stream,Salkehatchie nr Miley,',',32.98904958,-81.0526044
+"""02162500""",stream,Saluda nr Greenville,',',34.84233977,-82.4806814
+"""02173000""",stream,South Fork Edisto nr Denmark,',',33.39320916,-81.1331559
+"""02154790""",stream,South Pacolet nr Campobello,',',35.1065051,-82.1295549
+"""02165200""",stream,South Rabun nr Gray Court,',',34.52011957,-82.1570514
+"""02196000""",stream,Stevens Crk nr Modoc,',',33.72929717,-82.1817873
+"""02186000""",stream,Twelvemile Crk nr Liberty,',',34.8015012,-82.7484725
+"""02110500""",stream,Waccamaw nr Longs,',',33.9126719,-78.7150175
+"""02166500""",lake,Greenwood,',',34.17277778,-81.9034722
+"""02168500""",lake,Murray,',',34.052093,-81.22065329
+"""02172000""",lake,Moultrie,',',33.24461337,-79.991469
+"""02187010""",lake,Hartwell,',',34.5083333,-82.8552778
+"""02193900""",lake,Thurmond,',',33.84166667,-82.345
+"""021556524""",lake,Blalock,',',35.05817815,-81.8678816
+"""9""",duke,Jocassee,',',NA,NA
+"""10""",duke,Keowee,',',NA,NA
+"""17""",duke,Wateree,',',NA,NA
+"""18""",duke,Wylie,',',NA,NA
