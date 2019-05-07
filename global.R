@@ -368,11 +368,12 @@ downloadUSGSLakeData <- function(siteNumbers) {
     Data <- readNWISdata(
       sites=x, service='iv', parameterCd='00062',
       tz='America/New_York') %>%
-      renameNWISColumns() %>%
-      rename(`Water Level`='00062_Inst')
+      renameNWISColumns() %>% 
+      rename(`Water Level`='X_00062_Inst')
     Data$site_name = attr(Data, 'siteInfo')$station_nm
-    select(Data, -agency_cd, -`00062_Inst_cd`, -tz_cd) %>% # mutate(Date=as_datetime(Date))
-    removeNWISattributes() } ) %>% bind_rows() }
+    Data %>%
+      select(-agency_cd, -`X_00062_Inst_cd`, -tz_cd) %>% # mutate(Date=as_datetime(Date))
+      removeNWISattributes() } ) %>% bind_rows() }
 
 ## updateLakeData
 ## add endDate; add manual over-ride for duke levels?
