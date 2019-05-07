@@ -129,17 +129,18 @@ calculateInterpolatedPercentileFlows <- function(x){ ## x is a tibble with perce
   minPercentile <- min(x$percentile, na.rm=TRUE)
   maxPercentile <- max(x$percentile, na.rm=TRUE)
   
+  stupidInterpolation <- function(Interpercentile) {
+    if(minPercentile > Interpercentile) return(NA_real_)
+    if(maxPercentile < Interpercentile) return(NA_real_)
+    low <- filter(x, percentile == max(x$percentile[x$percentile < Interpercentile]))[1,]
+    high <- filter(x, percentile == min(x$percentile[x$percentile > Interpercentile]))[1,]
+    b <- low$Flow
+    m <- (high$Flow - low$Flow) / (high$percentile - low$percentile)
+    flow <- m*(Interpercentile-low$percentile)+b 
+    if(length(flow)==0) return(NA_real_) else return(flow)}
+  
   y <- tibble(percentileIntrp=seq(5,95,5)) %>% rowwise() %>%
-    do(
-      Flow = function(percentileIntrp) {
-        if(minPercentile > percentileIntrp) return(NA_real_)
-        if(maxPercentile < percentileIntrp) return(NA_real_)
-        low = filter(x, percentile == max(x$percentile[x$percentile < percentileIntrp]))[1,]
-        high = filter(x, percentile == min(x$percentile[x$percentile > percentileIntrp]))[1,]
-        b = low$Flow
-        m = (high$Flow - low$Flow) / (high$percentile - low$percentile)
-        flow = m*(percentileIntrp-low$percentile)+b 
-        if(length(flow)==0) return(NA_real_) else return(flow)} ) %>%
+    mutate(Flow = stupidInterpolation(percentileIntrp) ) %>%
     ungroup()
   
   z <- filter(x, (percentile == min(percentile) & percentile < 5) |
@@ -150,14 +151,14 @@ calculateInterpolatedPercentileFlows <- function(x){ ## x is a tibble with perce
   }
 
 calculateMultiDayPercentiles <- function(streamData) {
-    # incProgressSteps <- nrow(unique(streamData[,c('label', 'Day_and_month')]))
-    # incProgress(detail="Calculating 14 and 28-day means")
+    incProgressSteps <- nrow(unique(streamData[,c('label', 'Day_and_month')]))
+    incProgress(detail="Calculating 14 and 28-day means")
     streamData %>%
       calculateMultiDayAverageFlows() %>%
       group_by(label, Day_and_month) %>%
       do({
-        # incProgress(1/incProgressSteps, 
-        #             detail=paste0(unique(.$label), ' ', unique(.$Day_and_month)))
+        incProgress(1/incProgressSteps, 
+                    detail=paste0(unique(.$label), ' ', unique(.$Day_and_month)))
         bind_rows(
           `14`= calculateRawFlowPercentiles(.$Flow14) %>% calculateInterpolatedPercentileFlows(), 
           `28`= calculateRawFlowPercentiles(.$Flow28) %>% calculateInterpolatedPercentileFlows(), 
