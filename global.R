@@ -153,11 +153,11 @@ calculateMultiDayPercentiles <- function(streamData) {
       do({
         incProgress(1/incProgressSteps, 
                     detail=paste0(unique(.$label), ' ', unique(.$Day_and_month)))
-        `14` <- calculateRawFlowPercentiles(.$Flow14) %>%
+        fourteen <- calculateRawFlowPercentiles(.$Flow14) %>%
           calculateInterpolatedPercentileFlows()
-        `28` <- calculateRawFlowPercentiles(.$Flow28) %>%
+        twentyeight <- calculateRawFlowPercentiles(.$Flow28) %>%
           calculateInterpolatedPercentileFlows()
-        bind_rows(`14`=`14`, `28`=`28`, .id='ndays')
+        bind_rows(`14`=fourteen, `28`=twentyeight, .id='ndays')
       }) %>% ungroup() %>% saveRDS('appData//Multiday_Mean_Percentiles.rds')
 }
 
