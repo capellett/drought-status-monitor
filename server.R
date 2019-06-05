@@ -90,8 +90,7 @@ shinyServer(function(input, output) {
   ## add endDate option to this...
   ## add manual override for duke levels?
   
-  output$lakeTable <- renderTable({lakeData() %>%  mutate(Date=as.character(Date) ) 
-   } )
+  output$lakeTable <- renderTable({lakeData() } )
   
   output$downloadLakeStatus <- downloadHandler(
     filename= paste0('Reservoir Drought Status', Sys.Date(), '.csv'),
