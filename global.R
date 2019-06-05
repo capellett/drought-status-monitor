@@ -130,31 +130,28 @@ calculateInterpolatedPercentileFlows <- function(x){ ## x is a tibble with perce
   maxPercentile <- max(x$percentile, na.rm=TRUE)
   
   stupidInterpolation <- function(Interpercentile) {
-    if(minPercentile > Interpercentile) return(NA_real_)
-    if(maxPercentile < Interpercentile) return(NA_real_)
     low <- filter(x, percentile == max(x$percentile[x$percentile < Interpercentile]))[1,]
     high <- filter(x, percentile == min(x$percentile[x$percentile > Interpercentile]))[1,]
     b <- low$Flow
     m <- (high$Flow - low$Flow) / (high$percentile - low$percentile)
     flow <- m*(Interpercentile-low$percentile)+b 
-    if(length(flow)==0) return(NA_real_) else return(flow)}
-  
+    if(
+      (minPercentile > Interpercentile) |
+      (maxPercentile < Interpercentile) |
+      (length(flow)==0) ) NA_real_ else flow}
   y <- tibble(percentileIntrp=seq(5,95,5)) %>% rowwise() %>%
     mutate(Flow = stupidInterpolation(percentileIntrp) ) %>%
     ungroup()
-  
   z <- filter(x, (percentile == min(percentile) & percentile < 5) |
                 (percentile == max(percentile) & percentile > 95) ) %>%
     rename(percentileIntrp=percentile)
-  
   bind_rows(y, z)
   }
 
 calculateMultiDayPercentiles <- function(streamData) {
     incProgressSteps <- nrow(unique(streamData[,c('label', 'Day_and_month')]))
     incProgress(detail="Calculating 14 and 28-day means")
-    streamData %>%
-      calculateMultiDayAverageFlows() %>%
+    calculateMultiDayAverageFlows(streamData) %>%
       group_by(label, Day_and_month) %>%
       do({
         incProgress(1/incProgressSteps, 
@@ -262,7 +259,12 @@ plot_stream <-
       bind_rows(futureDays) %>%
       left_join(.month5thPercentiles, 'Day_of_year') %>%
       left_join(minMaxes, 'Day_of_year') %>%
-      left_join(.multiDayPercentiles, 'Day_and_month')
+      left_join(.multiDayPercentiles, 'Day_and_month') %>%
+      mutate(Flow=if_else(Flow<=0, NA_real_, Flow),
+             DailyMin=if_else(DailyMin<=0, NA_real_, DailyMin))
+    y_vals <- .streamData[,c('Flow', '95th Percentile', 'DailyMin')] %>% unlist()
+    y_vals[!is.finite(y_vals)] <- NA_real_
+    y_range <- range(y_vals, na.rm=TRUE)
     ggplot(.streamData, aes(x=Date)) +
       geom_ribbon(aes(ymin=`5th Percentile`, ymax=`25th Percentile`),
                   fill="lightsalmon", alpha=.5) +
@@ -288,8 +290,7 @@ plot_stream <-
            Dotted line is the historical minimum daily average flow.
            Dashed line is the historical 5th percentile daily flow, using a 30 day window.") +
       theme_bw() +
-      coord_cartesian(ylim=range(
-        .streamData[,c("Flow", "95th Percentile", "DailyMin")], na.rm=TRUE)) +
+      coord_cartesian(ylim=y_range) +
       ylab("Streamflow, cubic feet per second")
   }
 # plot_stream(index_type='28')
@@ -411,8 +412,9 @@ updateLakeData <- function(sites) {
   lakeData %<>% left_join(guideCurves, 'label') %>% 
     left_join(fullPool, 'label') %>%
     mutate(`Deviation from Guide Curve` = `Water Level`-Target,
-           `Deviation from Full Pool` = `Water Level` - `Full Pool`) %>%
-    select(site_no, label, Date=dateTime, `Water Level`, Target, `Full Pool`, 
+           `Deviation from Full Pool` = `Water Level` - `Full Pool`,
+           Date=as.character(dateTime)) %>%
+    select(site_no, label, Date, `Water Level`, Target, `Full Pool`, 
            `Deviation from Guide Curve`, `Deviation from Full Pool`) %>%
     saveRDS('appData//lakeData.rds')
 }
