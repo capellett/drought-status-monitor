@@ -187,13 +187,13 @@ updateStreamStatus <- function(streamData, multiDayPercentiles, month5thPercenti
         `14-Day Percentile` = {
           a <- calculateInterpolatedFlowPercentile(
             .label=label, .Day_and_month=Day_and_month, .ndays='14', .Flow=Flow14,
-            .multiDayPercentiles=multiDayPercentiles)
+            .multiDayPercentiles=multiDayPercentiles)[[1]]
           if(length(a)==0 | is.na(a) | is.null(a)) {a <- NA_real_}
           a},
         `28-Day Percentile` = {
           a <- calculateInterpolatedFlowPercentile(
             .label=label, .Day_and_month=Day_and_month, .ndays='28', .Flow=Flow28,
-            .multiDayPercentiles=multiDayPercentiles)
+            .multiDayPercentiles=multiDayPercentiles)[[1]]
           if(length(a)==0 | is.na(a) | is.null(a)) {a <- NA_real_}
           a})
     
