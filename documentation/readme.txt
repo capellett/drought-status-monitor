@@ -1,0 +1,1 @@
+To apply edits to the app_inputs.csv file to a fresh dataset, delete the .rds files located in the appdata directory.
