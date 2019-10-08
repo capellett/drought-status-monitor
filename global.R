@@ -33,7 +33,7 @@ removeNWISattributes <- function(x) {
 
 downloadStreamData <- function(siteNumber, startDate='', endDate='') {
   Data <- readNWISdv(
-    siteNumber=siteNumber, parameterCd='00060', 
+    siteNumbers=siteNumber, parameterCd='00060', 
     startDate=startDate, endDate=endDate) %>%
     renameNWISColumns()
   if(!("Flow" %in% names(Data)) &&
@@ -41,23 +41,26 @@ downloadStreamData <- function(siteNumber, startDate='', endDate='') {
     Data %<>% rename(Flow = PUBLISHED_Flow,
                      Flow_cd = PUBLISHED_Flow_cd ) }
   Data %>% select(site_no, Date, Flow, Flow_cd) %>%
-    removeNWISattributes() %>%
-    mutate(Day_of_year = as.numeric(strftime(Date, format='%j')),
-           Day_and_month = strftime(Date, format='%b %d'),
-           Flow14 = caTools::runmean(Flow, 14, 'exact', 'NA', 'right'),
-           Flow28 = caTools::runmean(Flow, 28, 'exact', 'NA', 'right') ) }
+    removeNWISattributes()}
+
+addStreamDataColumns <- function(data) {
+  mutate(data, Day_of_year = as.numeric(strftime(Date, format='%j')),
+         Day_and_month = strftime(Date, format='%b %d'),
+         Flow14 = caTools::runmean(Flow, 14, 'exact', 'NA', 'right'),
+         Flow28 = caTools::runmean(Flow, 28, 'exact', 'NA', 'right') ) }
 
 initializeStreamData <- function(sites) {
   sites %<>% filter(type=='stream')
     newData <- list()
     for(i in 1:nrow(sites)){
       site <- sites[i,]
-      endingDate <- site$endDate != '' & !is.na(site$endDate) & is.Date(as_date(site$endDate))
+      # endingDate <- site$endDate != '' & !is.na(site$endDate) & is.Date(as_date(site$endDate))
       startDate <- site$startDate
       newData[[i]] <- downloadStreamData(
         siteNumber=site$site_no, startDate=startDate, endDate=site$endDate) }
     bind_rows(newData) %>% 
       left_join(select(sites, site_no, label), by='site_no') %>% 
+      addStreamDataColumns() %>%
       saveRDS('appData//streamData.rds') }
 
 updateStreamData <- function(sites, streamData) {
@@ -84,6 +87,8 @@ updateStreamData <- function(sites, streamData) {
           filter(!(site_no == site$site_no & Date > as_date(site$endDate) ) ) } }
     incProgress(.1, detail='Combining and saving data.')
     newData <- bind_rows(newData) %>% 
+      complete(site_no, Date) %>%
+      addStreamDataColumns() %>%
       left_join(select(sites, site_no, label), by='site_no')
     streamData %>% anti_join(newData, by=c('site_no', 'Date')) %>% 
       bind_rows(newData) %>% 
