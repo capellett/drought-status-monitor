@@ -143,7 +143,8 @@ calculateInterpolatedPercentileFlows <- function(x){ ## x is a tibble with perce
     if(
       (minPercentile > Interpercentile) |
       (maxPercentile < Interpercentile) |
-      (length(flow)==0) ) NA_real_ else flow}
+      (length(flow)==0) ) return(NA_real_) else return(flow)}
+  
   y <- tibble(percentileIntrp=seq(5,95,5)) %>% rowwise() %>%
     mutate(Flow = stupidInterpolation(percentileIntrp) ) %>%
     ungroup()
@@ -175,7 +176,7 @@ calculateInterpolatedFlowPercentile <- function(.label, .Day_and_month, .ndays,
   if(nrow(z)==0) return(NA_real_)
   low = if(.Flow <= min(z$Flow)) {return(0)} else {
     filter(z, Flow == max(z$Flow[z$Flow < .Flow], na.rm=TRUE)) }
-  high = if(.Flow >= max(z$Flow)) {return(nrow(z)/(nrow(z)+1))} else {
+  high = if(.Flow >= max(z$Flow)) {return(nrow(z)*100/(nrow(z)+1))} else {
     filter(z, Flow == min(z$Flow[z$Flow > .Flow], na.rm=TRUE)) }
   b = low$percentileIntrp
   m = (high$percentileIntrp - low$percentileIntrp) / (high$Flow - low$Flow)
