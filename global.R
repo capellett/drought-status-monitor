@@ -47,7 +47,10 @@ addStreamDataColumns <- function(data) {
   mutate(data, Day_of_year = as.numeric(strftime(Date, format='%j')),
          Day_and_month = strftime(Date, format='%b %d'),
          Flow14 = caTools::runmean(Flow, 14, 'exact', 'NA', 'right'),
-         Flow28 = caTools::runmean(Flow, 28, 'exact', 'NA', 'right') ) }
+         Flow28 = caTools::runmean(Flow, 28, 'exact', 'NA', 'right') ) %>%
+    mutate(Day_and_month = if_else(Day_and_month == "Feb 29",
+                                 "Feb 28", Day_and_month))
+  }
 
 initializeStreamData <- function(sites) {
   sites %<>% filter(type=='stream')
@@ -143,7 +146,7 @@ calculateInterpolatedPercentileFlows <- function(x){ ## x is a tibble with perce
     if(
       (minPercentile > Interpercentile) |
       (maxPercentile < Interpercentile) |
-      (length(flow)==0) ) return(NA_real_) else return(flow)}
+      (length(flow)==0) ) NA_real_ else flow}
   
   y <- tibble(percentileIntrp=seq(5,95,5)) %>% rowwise() %>%
     mutate(Flow = stupidInterpolation(percentileIntrp) ) %>%
@@ -176,7 +179,7 @@ calculateInterpolatedFlowPercentile <- function(.label, .Day_and_month, .ndays,
   if(nrow(z)==0) return(NA_real_)
   low = if(.Flow <= min(z$Flow)) {return(0)} else {
     filter(z, Flow == max(z$Flow[z$Flow < .Flow], na.rm=TRUE)) }
-  high = if(.Flow >= max(z$Flow)) {return(nrow(z)*100/(nrow(z)+1))} else {
+  high = if(.Flow >= max(z$Flow)) {return(99)} else {
     filter(z, Flow == min(z$Flow[z$Flow > .Flow], na.rm=TRUE)) }
   b = low$percentileIntrp
   m = (high$percentileIntrp - low$percentileIntrp) / (high$Flow - low$Flow)
