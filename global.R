@@ -477,3 +477,76 @@ updateLakeData <- function(sites) {
 # # all.equal(streamData, updatedStreamData) ## TRUE
 # # all.equal(streamData, completedStreamData) ## TRUE
 # # all.equal(updatedStreamData, completedStreamData) ## TRUE
+
+
+
+######################################################################
+################## WELL DATA #########################################
+######################################################################
+
+downloadWellData <- function(siteNumber, startDate='', endDate='') {
+  Data <- readNWISgwl(siteNumbers=siteNumber,
+                      startDate=startDate, 
+                      endDate=endDate) %>%
+    renameNWISColumns()
+  if(!("Flow" %in% names(Data)) &&
+     !("Flow_cd" %in% names(Data) ) ) {
+    Data %<>% rename(Flow = PUBLISHED_Flow,
+                     Flow_cd = PUBLISHED_Flow_cd ) }
+  Data %>% select(site_no, Date, Flow, Flow_cd) %>%
+    removeNWISattributes()}
+
+addStreamDataColumns <- function(data) {
+  mutate(data, Day_of_year = as.numeric(strftime(Date, format='%j')),
+         Day_and_month = strftime(Date, format='%b %d'),
+         Flow14 = caTools::runmean(Flow, 14, 'exact', 'NA', 'right'),
+         Flow28 = caTools::runmean(Flow, 28, 'exact', 'NA', 'right') ) %>%
+    mutate(Day_and_month = if_else(Day_and_month == "Feb 29",
+                                   "Feb 28", Day_and_month))
+}
+
+initializeWellData <- function(sites) {
+  sites %<>% filter(type=='stream')
+  newData <- list()
+  for(i in 1:nrow(sites)){
+    site <- sites[i,]
+    # endingDate <- site$endDate != '' & !is.na(site$endDate) & is.Date(as_date(site$endDate))
+    startDate <- site$startDate
+    newData[[i]] <- downloadStreamData(
+      siteNumber=site$site_no, startDate=startDate, endDate=site$endDate) }
+  bind_rows(newData) %>% 
+    left_join(select(sites, site_no, label), by='site_no') %>% 
+    addStreamDataColumns() %>%
+    saveRDS('appData//streamData.rds') }
+
+updateWellData <- function(sites, streamData) {
+  sites %<>% filter(type=='stream')
+  withProgress(message='Updating Stream Flow Data', value=0, {
+    newData <- list()
+    for(i in 1:nrow(sites)){
+      site <- sites[i,]
+      existingSite <- site$site_no %in% streamData$site_no
+      endingDate <- site$endDate != '' & !is.na(site$endDate) & is.Date(as_date(site$endDate))
+      startDate <- if(existingSite) {
+        streamData[streamData$site_no == site$site_no,]$Date %>%
+          max(na.rm=TRUE) - 365} else {site$startDate}
+      progressDetail = paste0(
+        "Downloading data from ",
+        if(!existingSite){"new site "} else {" "},
+        site$label, startDate, ' to ',
+        if(endingDate){site$endDate} else {'present.'})
+      incProgress(.9/nrow(sites), detail=progressDetail)
+      newData[[i]] <- downloadStreamData(
+        siteNumber=site$site_no, startDate=startDate, endDate=site$endDate) 
+      if(existingSite) {newData[[i]] %<>% filter(Date > min(Date) + 28) }
+      if(endingDate){streamData %<>% 
+          filter(!(site_no == site$site_no & Date > as_date(site$endDate) ) ) } }
+    incProgress(.1, detail='Combining and saving data.')
+    newData <- bind_rows(newData) %>% 
+      complete(site_no, Date) %>%
+      addStreamDataColumns() %>%
+      left_join(select(sites, site_no, label), by='site_no')
+    streamData %>% anti_join(newData, by=c('site_no', 'Date')) %>% 
+      bind_rows(newData) %>% 
+      filter(site_no %in% sites$site_no) %>% 
+      saveRDS('appData//streamData.rds') } ) }
