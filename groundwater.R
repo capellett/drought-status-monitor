@@ -2,7 +2,7 @@
 ###### Groundwater Data #############
 #####################################
 
-downloadUSGSWellData <- function(siteNumber, startDate='', endDate='') {
+download_USGS_Well_Data <- function(siteNumber, startDate='', endDate='') {
   Data <- dataRetrieval::readNWISgwl(siteNumbers=siteNumber,
                       startDate=startDate, 
                       endDate=endDate) %>%
@@ -37,14 +37,14 @@ downloadUSGSWellData <- function(siteNumber, startDate='', endDate='') {
   return(Data)}
 
 
-initializeUSGSWellData <- function(sites) {
+initialize_USGS_Well_Data <- function(sites) {
   sites <- dplyr::filter(sites, type=='USGS well')
   newData <- list()
   for(i in 1:nrow(sites)){
     site <- sites[i,]
     # endingDate <- site$endDate != '' & !is.na(site$endDate) & is.Date(as_date(site$endDate))
     startDate <- site$startDate
-    newData[[i]] <- downloadUSGSWellData(
+    newData[[i]] <- download_USGS_Well_Data(
       siteNumber=site$site_no, startDate=startDate, endDate=site$endDate) }
   
   wellData <- dplyr::bind_rows(newData) %>% 
@@ -53,10 +53,10 @@ initializeUSGSWellData <- function(sites) {
   saveRDS(wellData, 'appData//usgsWellData.rds')
   invisible(wellData)}
 
-# initializeUSGSWellData(sites)
+# initialize_USGS_Well_Data(sites)
 
 
-updateUSGSWellData <- function(sites, usgsWellData) {
+update_USGS_Well_Data <- function(sites, usgsWellData) {
   sites %<>% dplyr::filter(type=='USGS well')
   shiny::withProgress(message='Updating USGS Well Data', value=0, {
     newData <- list()
@@ -73,7 +73,7 @@ updateUSGSWellData <- function(sites, usgsWellData) {
         site$label, startDate, ' to ',
         if(endingDate){site$endDate} else {'present.'})
       shiny::incProgress(.9/nrow(sites), detail=progressDetail)
-      newData[[i]] <- downloadUSGSWellData(
+      newData[[i]] <- download_USGS_Well_Data(
         siteNumber=site$site_no, startDate=startDate, endDate=site$endDate) 
       if(existingSite) {newData[[i]] %<>% dplyr::filter(Date > min(Date) + 28) }
       if(endingDate){usgsWellData %<>% 

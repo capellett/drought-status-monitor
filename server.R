@@ -104,10 +104,10 @@ shinyServer(function(input, output) {
   if(!file.exists("appData//usgsWellData.rds")) {
     shiny::withProgress(message = "appData/usgsWellData.rds not found.",
                         detail = 'Downloading USGS well data.',
-                        expr=initializeUSGSWellData(sites) ) }
+                        expr=initialize_USGS_Well_Data(sites) ) }
   usgsWellData <- reactiveFile('appData//usgsWellData.rds')
   
-  observeEvent(input$updateUSGSWellData, ignoreInit=TRUE, updateUSGSWellData(sites, usgsWellData()) )
+  observeEvent(input$update_USGS_Well_Data, ignoreInit=TRUE, update_USGS_Well_Data(sites, usgsWellData()) )
   
   baseflow <- reactive({calculateBaseflow(streamData())})
   

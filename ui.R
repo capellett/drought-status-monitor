@@ -70,6 +70,7 @@ shinyUI(
           tabsetPanel(
             tabPanel(
               title='Groundwater Condition Table',
+              actionButton('update_USGS_Well_Data', 'Update USGS Well Data'),
               actionButton('update_GW_status', 'Update Groundwater Conditions'),
               downloadButton('downloadGWStatus', 'Export Groundwater Conditions'),
               tableOutput('gwTable') ),
