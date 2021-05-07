@@ -82,11 +82,13 @@ shinyServer(function(input, output) {
   
   
 ####### Reservoirs
-  ## if () this file doesn't exist, create it.
+  if(!file.exists("appData//lakeData.rds")) {
+    shiny::withProgress(message="appData/lakeData.rds not found.",
+                 detail='Initializing lake level data.',
+                 expr=updateLakeData(sites) ) }
   lakeData <- reactiveFile('appData//lakeData.rds')
   
-  observeEvent(input$updateLakeData, ignoreInit=TRUE, {
-    filter(sites, type %in% c('lake', 'duke')) %>% updateLakeData() } ) 
+  observeEvent(input$updateLakeData, ignoreInit=TRUE, updateLakeData(sites)) 
   ## add endDate option to this...
   ## add manual override for duke levels?
   
@@ -96,5 +98,49 @@ shinyServer(function(input, output) {
     filename= paste0('Reservoir Drought Status', Sys.Date(), '.csv'),
     content= function(file) {lakeData() %>%
         write.csv(file) } )
+
+
+###### Groundwater
+  if(!file.exists("appData//usgsWellData.rds")) {
+    shiny::withProgress(message = "appData/usgsWellData.rds not found.",
+                        detail = 'Downloading USGS well data.',
+                        expr=initializeUSGSWellData(sites) ) }
+  usgsWellData <- reactiveFile('appData//usgsWellData.rds')
   
+  observeEvent(input$updateUSGSWellData, ignoreInit=TRUE, updateUSGSWellData(sites, usgsWellData()) )
+  
+  baseflow <- reactive({calculateBaseflow(streamData())})
+  
+  ## Combine USGS well measurements, baseflows, (and DNR measurements)
+  ## site_no, label, Date, Value, Type
+  
+  gw_data <- reactive({
+    dplyr::bind_rows(
+      .id="Type",
+      USGS_well = usgsWellData() %>%
+        dplyr::select(site_no, label, Date, Value),
+      baseflow = baseflow() %>%
+        dplyr::select(site_no, label, Date, Value)
+    # DNR_well = {}
+    )})
+
+  if(!file.exists("appData//gwStatus.rds")) updateGWStatus(gw_data())
+  gwStatus <- reactiveFile('appData//gwStatus.rds')
+  
+  observeEvent(input$update_GW_status, ignoreInit=TRUE, updateGWStatus(gw_data()) )
+  
+  output$gwTable <- renderTable(gwStatus())
+  
+  output$gwMap_all <- renderPlot(mapGroundwater(gwStatus(), sites, counties))
+  
+  output$gwMap_usgs_wells <- renderPlot(
+    mapGroundwater(dplyr::filter(gwStatus(), Type=="USGS_well"), sites, counties))
+  
+  output$gwMap_baseflow <- renderPlot(
+    mapGroundwater(dplyr::filter(gwStatus(), Type=="baseflow"), sites, counties))
+    
+  output$downloadGWStatus <- downloadHandler(
+    filename=paste0('Groundwater Conditions', Sys.Date(), '.csv'),
+    content=function(file) write.csv(gwStatus(), file))
+
 })
