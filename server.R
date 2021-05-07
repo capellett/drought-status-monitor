@@ -85,10 +85,10 @@ shinyServer(function(input, output) {
   if(!file.exists("appData//lakeData.rds")) {
     shiny::withProgress(message="appData/lakeData.rds not found.",
                  detail='Initializing lake level data.',
-                 expr=updateLakeData(sites) ) }
+                 expr=update_Lake_Levels(sites) ) }
   lakeData <- reactiveFile('appData//lakeData.rds')
   
-  observeEvent(input$updateLakeData, ignoreInit=TRUE, updateLakeData(sites)) 
+  observeEvent(input$update_Lake_Levels, ignoreInit=TRUE, update_Lake_Levels(sites)) 
   ## add endDate option to this...
   ## add manual override for duke levels?
   

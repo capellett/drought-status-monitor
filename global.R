@@ -25,7 +25,7 @@ sites <- read.csv('www//app_inputs.csv', stringsAsFactors=FALSE) %>%
 
 source('streamflow.R')
 
-source('reservoirs.R')
+source('lakes.R')
 
 source('groundwater.R')
 

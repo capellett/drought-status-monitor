@@ -50,7 +50,7 @@ scrapeDukeLakeLevels <- function(
   }); 
   dplyr::filter(lakeData, site_name %in% lakes) }
 
-downloadUSGSLakeData <- function(siteNumbers) {
+download_USGS_Lake_Levels <- function(siteNumbers) {
   lapply(siteNumbers, function(x) {
     Data <- dataRetrieval::readNWISdata(
       sites=x, service='iv', parameterCd='00062',
@@ -64,9 +64,9 @@ downloadUSGSLakeData <- function(siteNumbers) {
 
 ## updateLakeData
 ## add endDate; add manual over-ride for duke levels?
-updateLakeData <- function(sites) {
+update_Lake_Levels <- function(sites) {
   sites <- dplyr::filter(sites, type %in% c('lake', 'duke'))
-  USGS_lake_data <- downloadUSGSLakeData(dplyr::filter(sites, type=='lake')$site_no)
+  USGS_lake_data <- download_USGS_Lake_Levels(dplyr::filter(sites, type=='lake')$site_no)
   Duke_lake_data <- scrapeDukeLakeLevels() %>%
     dplyr::mutate(dateTime=lubridate::mdy_hm(dateTime))
   lakeData <- dplyr::bind_rows(USGS_lake_data, Duke_lake_data) %>%

@@ -51,7 +51,7 @@ shinyUI(
           tabsetPanel(
             tabPanel(
               title='Lake Level Table',
-              actionButton('updateLakeData', 'Update Lake Levels'),
+              actionButton('update_Lake_Levels', 'Update Lake Levels'),
               downloadButton('downloadLakeStatus', 'Export Lake Level Table'),
               tableOutput('lakeTable')
               ),
