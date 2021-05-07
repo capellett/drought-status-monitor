@@ -82,7 +82,7 @@ calculate30day5thPercentiles <- function(Data) {
     Data3 <- dplyr::group_by(site_flow_data, Day_of_year) %>%
       dplyr::summarise(`30-Day 5th Percentile` = {
         day <- unique(Day_of_year)
-        dayRange <- (day-21):(day+6)
+        dayRange <- (day-15):(day+15)
         Data4 <- dplyr::filter(site_flow_data, 
                                (Day_of_year %in% dayRange) | 
                                  ((Day_of_year - 365) %in% dayRange) |
