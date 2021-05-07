@@ -199,7 +199,7 @@ updateStreamStatus <- function(streamData, multiDayPercentiles, month5thPercenti
     
     shiny::incProgress(.5, detail='Labeling drought statuses')
     drought_labels <- c('Extreme','Severe','Moderate', 
-                        'Incipient','no drought')
+                        'Incipient','No Drought')
     streamStatus %>% dplyr::mutate(
       `Regulatory Method` = cut(Flow14/`30-Day 5th Percentile`, 
                                 c(Inf, 1.2, 1.1, 1, .9, 0),

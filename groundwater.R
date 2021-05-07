@@ -67,7 +67,7 @@ update_USGS_Well_Data <- function(sites, usgsWellData) {
       startDate <- if(existingSite) {
         usgsWellData[usgsWellData$site_no == site$site_no,]$Date %>%
           max(na.rm=TRUE) - 365} else {site$startDate}
-      shiny::progressDetail = paste0(
+      progressDetail = paste0(
         "Downloading data from ",
         if(!existingSite){"new site "} else {" "},
         site$label, startDate, ' to ',
@@ -175,7 +175,9 @@ mapGroundwater <- function(gwStatus, sites, counties) {
       dplyr::select(sites, site_no, lat, lng), by="site_no")
   
   ## interpolate a grid before creating contours
-  pts.grid <- akima::interp(gwStatusPts$lng, gwStatusPts$lat, gwStatusPts$Percentile)
+  pts.grid <- akima::interp(
+    gwStatusPts$lng, gwStatusPts$lat, gwStatusPts$Percentile,
+    nx=200, ny=200)
   pts.grid2 <- expand.grid(x=pts.grid$x, y=pts.grid$y)
   pts.grid2$z <- as.vector(pts.grid$z)
   

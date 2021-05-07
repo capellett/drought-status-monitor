@@ -124,7 +124,7 @@ shinyServer(function(input, output) {
     # DNR_well = {}
     )})
 
-  if(!file.exists("appData//gwStatus.rds")) updateGWStatus(gw_data())
+  if(!file.exists("appData//gwStatus.rds")) saveRDS(NULL, 'appData//gwStatus.rds') 
   gwStatus <- reactiveFile('appData//gwStatus.rds')
   
   observeEvent(input$update_GW_status, ignoreInit=TRUE, updateGWStatus(gw_data()) )
