@@ -207,8 +207,12 @@ mapGroundwater <- function(gwStatus, sites, counties) {
     #     `D1 Moderate` = 'sandybrown', `D2 Severe` = 'darkorange', `D3 Extreme` = 'firebrick1',
     #     `D4 Exceptional` = 'darkred')) +
     ggplot2::scale_shape_manual(values=c(baseflow = 21, USGS_well = 24, DNR_well = 25)) +
-
-    ggplot2::theme_bw()}
+    ggplot2::theme_bw() +
+    ggplot2::theme(panel.grid = element_blank(),
+                   axis.title = element_blank(),
+                   axis.text = element_blank(),
+                   axis.ticks = element_blank(),
+                   panel.background = element_blank())}
 
 
 
