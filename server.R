@@ -99,6 +99,8 @@ shinyServer(function(input, output) {
     content= function(file) {lakeData() %>%
         write.csv(file) } )
 
+  output$lakeMap <- renderPlot({
+    make_lake_map(lakeData=lakeData(), lakes=lakes, counties=counties)})
 
 ###### Groundwater
   if(!file.exists("appData//usgsWellData.rds")) {

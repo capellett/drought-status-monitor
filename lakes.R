@@ -104,3 +104,60 @@ update_Lake_Levels <- function(sites) {
 }
 
 ### Flag missing data
+
+# lakes <- sf::st_read('mapData/lakes.shp')
+# lakes2 <- sf::st_read('mapData/lakes2.shp')
+# lakes <- dplyr::bind_rows(lakes, lakes2)
+# rm(lakes2)
+# lakes$label <- c(
+#   'Thurmond', 'Murray', 'Wateree', 'Blalock', 'Hartwell', 'Wylie',
+#   'Greenwood', 'Moultrie', 'Hartwell', 'Jocassee', 'Keowee', 'Hartwell')
+# 
+# lakes <- lakes %>%
+#   dplyr::group_by(label) %>%
+#   dplyr::summarise(
+#     geometry = sf::st_union(geometry))
+# 
+# saveRDS(lakes, 'mapData/lakes.rds')
+
+
+
+make_lake_map <- function(lakeData, lakes=lakes, counties=counties) {
+  lakeData %>%
+    dplyr::mutate(
+      Deviation = 
+        dplyr::if_else(is.na(Target), 
+                       `Deviation from Full Pool`, 
+                       `Deviation from Guide Curve`) %>%
+        round(2)) %>%
+    dplyr::mutate(
+      Deviation = dplyr::if_else(
+        Deviation >= 0, paste0("+", Deviation), as.character(Deviation))) %>%
+    dplyr::mutate(
+      mapText = paste0(label, ": ", Deviation)) %>%
+    dplyr::right_join(lakes, by='label') %>%
+    ggplot2::ggplot(ggplot2::aes(geometry=geometry)) +
+    ggplot2::geom_sf(data=counties, alpha=0.5,
+                     ggplot2::aes(fill=DMA)) +
+    ggplot2::geom_sf(fill='blue', color='blue') +
+    ggplot2::geom_sf_label(ggplot2::aes(label=mapText),
+                           nudge_y = 0.1) +
+    # ggplot2::scale_fill_manual() +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5),
+      legend.position="none",
+      panel.grid = element_blank(),
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.background = element_blank()) +
+    ggplot2::ggtitle(
+      paste0("Lake Level Deficit/Surplus on ", 
+             format.Date(max(lakeData$Date), "%b %d, %Y")),
+      "(Deficit/Surplus values are referenced to guide curves, 
+      except Jocassee and Keowee which are referenced to full pool)")
+}
+
+
