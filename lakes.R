@@ -152,7 +152,8 @@ make_lake_map <- function(lakeData, lakes=lakes, counties=counties) {
       axis.title = element_blank(),
       axis.text = element_blank(),
       axis.ticks = element_blank(),
-      panel.background = element_blank()) +
+      panel.background = element_blank(),
+      panel.border = element_blank()) +
     ggplot2::ggtitle(
       paste0("Lake Level Deficit/Surplus on ", 
              format.Date(max(lakeData$Date), "%b %d, %Y")),

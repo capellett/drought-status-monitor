@@ -307,3 +307,93 @@ di_plot <- function(siteNumber, flowData=flowData, flow='Flow14',
     xts(x=.[,-1], order.by=.$Date) %>%
     dygraph()
 }
+
+
+
+################################
+##### Streamflow map ###########
+################################
+
+### import NHD flowlines
+
+make_streamflow_map <- function(streamStatus, sites=sites, counties=counties, drought_method="Regulatory Method") {
+  streamGageNotes <- tibble::tribble(
+    ~site_no,   ~note,
+    '02162500', '(moderate regulation)',
+    '02156500', '(moderate regulation)',
+    '02147020', '(regulated)',
+    '02131000', '(regulated)')
+  
+  streamGages <- streamStatus %>%
+    dplyr::left_join(
+      dplyr::select(sites, site_no, lat, lng, label.lat, label.lng), by="site_no" ) %>%
+    dplyr::left_join(streamGageNotes, by='site_no') %>%
+    dplyr::mutate(
+      label = dplyr::if_else(
+        is.na(note), label, paste0(label, " \n ", note)),
+      Date = lubridate::mdy(Date)) %>%
+    sf::st_as_sf(coords=c('lng', 'lat'), crs=4326)
+  
+  drought_method <- c("Regulatory Method", "14-Day Method", "28-Day Method")
+  
+  selected_drought_method <- drought_method[1]
+  
+  plot_subtitle <- paste0(
+    "(", selected_drought_method, " as of ", 
+    format.Date(max(streamGages$Date), "%b %d, %Y"), ")")
+  
+  ggplot2::ggplot(mapping=ggplot2::aes(geometry=geometry)) +
+    ggplot2::geom_sf(
+      data=counties, alpha=0.5, show.legend=FALSE,
+      mapping=ggplot2::aes(fill=DMA)) +
+    ggnewscale::new_scale_fill() +
+    ggplot2::geom_sf(
+      data=streamGages, shape = 21,
+      mapping=ggplot2::aes(fill=`Regulatory Method`)) +
+    ggplot2::scale_fill_manual(
+      name="Drought Status", drop=FALSE,
+      values = c(
+        `No Drought`='lightblue',
+        Incipient='yellowgreen',
+        Moderate='tan',
+        Severe='darkred',
+        Extreme='red') ) +
+    # ggrepel::geom_text_repel(
+    #   data=streamGages, # stat="sf_coordinates",
+    #   mapping=ggplot2::aes(label=label, x=label.lng, y=label.lat), 
+    #   force_pull=0.2) +
+    ggplot2::theme_bw() +
+    ggplot2::theme(
+      plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5),
+      panel.grid = element_blank(),
+      axis.title = element_blank(),
+      axis.text = element_blank(),
+      axis.ticks = element_blank(),
+      panel.background = element_blank(),
+      panel.border = element_blank()) +
+    ggplot2::ggtitle(
+      "Stream Gage Drought Status",
+      plot_subtitle)
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

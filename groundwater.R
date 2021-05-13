@@ -212,7 +212,8 @@ mapGroundwater <- function(gwStatus, sites, counties) {
                    axis.title = element_blank(),
                    axis.text = element_blank(),
                    axis.ticks = element_blank(),
-                   panel.background = element_blank())}
+                   panel.background = element_blank(),
+                   panel.border = element_blank())}
 
 
 

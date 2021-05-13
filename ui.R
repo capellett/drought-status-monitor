@@ -40,6 +40,10 @@ shinyUI(
               tableOutput('streamData')
               ),
             tabPanel(
+              title='Stream Flow Map',
+              plotOutput('streamMap')
+            ),
+            tabPanel(
               title='Stream Flow Plot',
               selectInput('streamPlotGageLabel', 'Stream Gage', filter(sites, type=='stream')$label),
               selectInput('nDays', 'Number of days', c('14', '28')),

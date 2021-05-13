@@ -80,6 +80,8 @@ shinyServer(function(input, output) {
                 .streamData=streamData(), .month5thPercentiles=month5thPercentiles(),
                 .multiDayPercentiles=multiDayPercentiles() ) })
   
+  output$streamMap <- renderPlot({
+    make_streamflow_map(streamStatus=streamStatus(), sites=sites, counties=counties)})
   
 ####### Reservoirs
   if(!file.exists("appData//lakeData.rds")) {
