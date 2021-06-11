@@ -34,7 +34,8 @@ shinyServer(function(input, output) {
     updateStreamData(sites, streamData()) } )
   
   observeEvent(input$updateStreamStatus, ignoreInit=TRUE, {
-     updateStreamStatus(streamData(), multiDayPercentiles(), month5thPercentiles() ) })
+     updateStreamStatus(streamData(), multiDayPercentiles(), 
+                        month5thPercentiles(), .date=input$streamStatusDate ) })
   
   observeEvent(input$updateStreamStats, ignoreInit=TRUE, {
     withProgress(message='Calculating statistics', {

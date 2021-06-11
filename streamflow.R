@@ -163,10 +163,13 @@ calculateInterpolatedFlowPercentile <- function(.label, .Day_and_month, .ndays,
   m * (.Flow - low$Flow) + b
 }
 
-updateStreamStatus <- function(streamData, multiDayPercentiles, month5thPercentiles) {
+updateStreamStatus <- function(streamData, multiDayPercentiles, 
+                               month5thPercentiles, .date=lubridate::today()) {
   shiny::withProgress(message = "Updating drought status", {
     streamStatus <- streamData[!(is.na(streamData$Flow)),] %>%
-      dplyr::group_by(label) %>% slice(which.max(Date)) %>%
+      dplyr::group_by(label) %>% 
+      dplyr::filter(Date <= .date) %>%
+      slice(which.max(Date)) %>%
       dplyr::left_join(month5thPercentiles, by=c('label', 'Day_of_year') ) %>%
       dplyr::ungroup() %>% dplyr::rowwise() %>%
       dplyr::mutate(

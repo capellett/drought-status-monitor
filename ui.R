@@ -11,6 +11,11 @@ shinyUI(
               actionButton('updateStreamData', 'Update Stream Flow Data'),
               actionButton('updateStreamStatus', 'Update Stream Flow Drought Status'),
               downloadButton('downloadStreamStatus', 'Export Stream Flow Drought Status Table'),
+              dateInput(inputId='streamStatusDate', 
+                        label='Date',
+                        value=lubridate::today(),
+                        min='2020-01-01',
+                        max=lubridate::today()),
               tableOutput("streamTable")
               ),
             # tabPanel(
