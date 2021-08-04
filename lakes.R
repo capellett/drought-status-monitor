@@ -1,3 +1,8 @@
+## TODO
+## Lake Moultrie actually doesn't have a guide curve or target elevation
+## Lake Marion does, so maybe we should be using that.
+
+
 ################################ LAKE DATA ##################################
 scrapeDukeLakeLevels <- function(
   lakes=c('Jocassee', 'Keowee', 'Wateree', 'Wylie') ) {
