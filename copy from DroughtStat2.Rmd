@@ -1,0 +1,284 @@
+---
+  title: "groundwater_percentile_calc"
+author: "Priyanka More"
+date: "1/26/2022"
+output: html_document
+---
+  
+  ```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+```{r setup}
+library(droughtstat)
+library(dplyr)
+library(xlsx)
+library(purrr)
+library(lubridate)
+library(tidyr)
+library(ggplot2)
+library(sf)
+library(purrr)
+```
+
+
+I. Import Groundwater well data
+Make sure in the vignette folder, only the excel files for the required wells are stored. Presence if any other excel file would cause the next step to fail.
+
+```{r check-directory}
+getwd()
+
+```
+
+Put the excel files for all wells in the vignettes folder. Only include excel files for the wells that we want to calculate statistics for. Otherwise, the other non required excel files would combine.
+
+```{r import-gw-data}
+GW_files <- list.files(pattern = "*.xlsx$")
+```
+
+II. Combine excel data for all the required wells together, and only select the required columns.
+Remove NA's from selected columns. These NA's create problems later when trying to plot the df. 
+Better to filter them out here.
+
+```{r combine-well-data}
+GW_data <- GW_files %>% purrr::map_dfr(read.xlsx, "Sheet1") %>%
+  dplyr::select(Well_ID, Date_Time, Daily_WL_.ft_bls.) %>%
+  dplyr::rename(Daily_WL_ft_bls =`Daily_WL_.ft_bls.`)
+
+# bind_dat <- rbind(GW_data, CTF_0081_WL)
+
+# There are few rows that have NA's in all the above selected columns. Delete these rows.
+GW_data2 <- GW_data[rowSums(is.na(GW_data)) !=ncol(GW_data),] %>%
+  dplyr::select(Well_ID,Date_Time,Daily_WL_ft_bls) %>%
+  dplyr::mutate(Month = lubridate::month(Date_Time, label = TRUE),
+                Year = lubridate::year(Date_Time))
+```
+
+III. Save the above created dataframe as R data format.
+
+```{r save-gw-rds}
+# This has to be updated if any edits are made to the above code or new wells are added in
+saveRDS(GW_data2, file = "GW_data2")
+
+```
+
+IV. Load the saved rds dataframe
+
+```{r load-gw-rds-data}
+GW_data2 <- readRDS("GW_data2")
+```
+
+V. Run the monthly percentile function to calculate the monthly percentile summary for each well ID.
+
+```{r calc-gw-monthly-percentile}
+## AP: if we include start_year and end_year as columns in a table with well_id,
+## then all this 80+ lines of code could be reduced to less than 10 lines.
+
+CTF_0081_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "CTF-0081", 
+  start_year = 1999, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="CTF-0081")
+
+DIL_0174_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "DIL-0174", 
+  start_year = 2014, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="DIL-0174")
+
+GRV_3342_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "GRV-3342", 
+  start_year = 1998, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="GRV-3342")
+
+KER_0263_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "KER-0263", 
+  start_year = 1993, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="KER-0263")
+
+LRN_1705_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "LRN-1705", 
+  start_year = 2000, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="LRN-1705")
+
+JAS_0425_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "JAS-0425", 
+  start_year = 2000, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="JAS-0425")
+
+ORG_0431_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "ORG-0431", 
+  start_year = 2001, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="ORG-0431")
+
+SAL_0069_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "SAL-0069", 
+  start_year = 1993, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="SAL-0069")
+
+CHN_0101_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "CHN-0101", 
+  start_year = 1980, end_year = 2021) %>%
+  dplyr::mutate(Well_ID ="CHN-0101")
+
+AIK_0849_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "AIK-0849", 
+  start_year = 1993, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="AIK-0849")
+
+AIK_0847_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "AIK-0847", 
+  start_year = 1993, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="AIK-0847")
+
+ALL_0372_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "ALL-0372", 
+  start_year = 1996, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="ALL-0372")
+
+BERK_0644_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "BERK-0644", 
+  start_year = 2001, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="BERK-0644")
+
+CHN_0044_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "CHN-0044", 
+  start_year = 1980, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="CHN-0044")
+
+LEE_0181_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "LEE-0181", 
+  start_year = 2012, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="LEE-0181")
+
+SUM_0355_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "SUM-0355", 
+  start_year = 2003, end_year = 2016) %>%
+  dplyr::mutate(Well_ID ="SUM-0355")
+
+SUM_0488_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "SUM-0488", 
+  start_year = 2009, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="SUM-0488")
+
+CAL_0192_monthly_percentile <- calc_gw_monthly_percentile(
+  groundwater_data = GW_data2, well_id = "CAL-0192", 
+  start_year = 2013, end_year = 2022) %>%
+  dplyr::mutate(Well_ID ="CAL-0192")
+```
+
+```{r check-percentile-Anderson}
+# this chunk is to compare percentile calculation with USGS's percentile method. Should be deleted after confirming the methodology (AP:Don't delete your tests.)
+
+AND <- Anderson %>%
+  dplyr::filter(X_72019_00003_cd=="A") %>%
+  dplyr::filter(year < 2020)
+dplyr::group_by(month) %>%
+  dplyr::summarise(Mean = mean(`Mean Water Levels`, na.rm = T)) %>%
+  dplyr::ungroup() %>%
+  dplyr::group_by(month) %>%
+  dplyr::summarise(Lowest_Median = max(Median, na.rm = TRUE),
+                   `10th_percentile` = stats::quantile(Median, probs = .9, na.rm = TRUE),
+                   `25th_percentile` = stats::quantile(Median, probs = .75, na.rm = TRUE),
+                   `50th_percentile` = stats::quantile(Median, probs = .5, na.rm = TRUE),
+                   `75th_percentile` = stats::quantile(Median, probs = .25, na.rm = TRUE),
+                   `90th_percentile` = stats::quantile(Median, probs = .1, na.rm = TRUE),
+                   Highest_Median = min(Median, na.rm = TRUE))
+```
+
+VI. Export calculated monthly percentile as excel file
+
+```{r export-percentile-excel}
+## AP: write.xlsx can take list input, so this could easily reduce to 1-2 lines of code.
+## also, Sys.Date() returns the date.
+
+xlsx::write.xlsx(CTF_0081_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "CTF-0081", row.names = TRUE)
+xlsx::write.xlsx(DIL_0174_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "DIL-0174", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(GRV_3342_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "GRV-3342", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(KER_0263_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "KER-0263", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(LRN_1705_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "LRN-1705", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(JAS_0425_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "JAS-0425", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(ORG_0431_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "ORG-0431", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(SAL_0069_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "SAL-0069", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(CHN_0101_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "CHN-0101", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(AIK_0849_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "AIK-0849", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(AIK_0847_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "AIK-0847", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(ALL_0372_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "ALL-0372", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(BERK_0644_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "BERK-0644", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(CHN_0044_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "CHN-0044", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(LEE_0181_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "LEE-0181", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(SUM_0355_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "SUM-0355", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(SUM_0488_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "SUM-0488", row.names = TRUE, append = TRUE)
+xlsx::write.xlsx(CAL_0192_monthly_percentile, file="C:/Users/MoreP/Documents/R_package/Drought/updated_percentile_06_2022.xlsx", sheetName = "CAL-0192", row.names = TRUE, append = TRUE)
+```
+
+VII. Plot percentile and current data
+
+```{r plot-percentile-data}
+#CTF-0081#################
+CTF_0081_daily_avg_data <- GW_data2 %>%
+  dplyr::filter(Well_ID =="CTF-0081", Date_Time > as.Date("2021-02-28"), Date_Time < as.Date("2022-01-01"))
+
+CTF_0081_percentile_plot <- percentile_plot(year=2021, month=03, day1=01, day15= 15, percentile_data = CTF_0081_monthly_percentile,
+                                            daily_avg_data = CTF_0081_daily_avg_data)+
+  ggplot2::ggtitle("CTF-0081 (Chesterfield County/Pee Dee Basin)")+
+  ggplot2::theme(plot.title = element_text(face = "bold", hjust = 0.5, size = 20))
+
+CTF_0081_percentile_plot
+ggsave(filename = file.path("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/plots", "CTF-0081.png"),
+       width = 9, height = 7, dpi=300, units = "in", device = 'png')
+```
+
+VIII. Import required shapefiles for mapping
+
+```{r shp-import, include =FALSE}
+SC_rivers_import <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/SC_RiversTA_2.shp") %>%
+  dplyr::filter(Rank==1) %>%
+  dplyr::select(!Rank)
+
+SC_major_lakes <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/MajorLakesRevised.shp") %>%
+  dplyr::select(Name, geometry)
+
+SC_counties <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/SC_Counties_Updated.shp") %>%
+  dplyr::select(!Cap_Use_ID)
+
+PeeDee_area <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/PeeDee_DroughtBasin_Dissolve.shp")
+
+ACE_area <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/ACE_DroughtBasin_Dissolve.shp")
+
+Santee_area <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/Santee_DroughtBasin_Dissolve.shp")
+
+Savannah_area <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/Savannah_DroughtBasin_Dissol.shp")
+
+GW_drought_sites <- sf::st_read("C:/Users/MoreP/Documents/R_package/Drought/droughtstat/GIS/GW_DroughtStatus_MapSites.shp") %>%
+  dplyr::mutate(lat = unlist(purrr::map(geometry,1)),
+                long = unlist(purrr::map(geometry,2))) %>%
+  dplyr::filter(COUNTYNUMB != "SUM-0355")
+
+```
+
+
+IX. Mapping (in progress)
+
+```{r map-drought-status, eval = FALSE}
+
+GW_drought_status_map <- ggplot2::ggplot()+
+  ggplot2::geom_sf(data = PeeDee_area, fill = "navajowhite2")+
+  ggplot2::geom_sf(data = ACE_area, fill = "lightskyblue1")+
+  ggplot2::geom_sf(data = Santee_area, fill = "darkseagreen2")+
+  ggplot2::geom_sf(data = Savannah_area, fill = "darkseagreen3")+
+  ggplot2::geom_sf(data = SC_counties,fill= NA, color = "black")+
+  ggplot2::geom_sf(data = SC_rivers_import,color = "darkblue")+
+  ggplot2::geom_sf(data = SC_major_lakes, color = "dodgerblue3", fill ="dodgerblue3")+
+  ggplot2::geom_point(data = GW_drought_sites, aes(x = lat, y = long, color =Level),shape=15, size = 3)+
+  ggplot2::scale_color_manual(values = c("Much Above Normal" = "blue3", "Above Normal" = "cyan1", "Future Site" = "gray85", "High" ="black",
+                                         "Insufficient Data" = "grey35", "Normal" = "green", "Much Below Normal" = "red4", "Below Normal" = "orange"), name = "Level")+
+  ggplot2::geom_text(data = subset(GW_drought_sites, Level != "Future Site"),aes(x = lat, y = long,label = COUNTYNUMB, hjust=0, vjust=-0.5))+
+  theme_void()
+GW_drought_status_map
+
+
+```
+
+
+
+

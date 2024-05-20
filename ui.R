@@ -55,24 +55,24 @@ shinyUI(
               plotOutput('streamPlot') )
             )
           ),
-        tabPanel(
-          title='Lakes',
-          tabsetPanel(
-            tabPanel(
-              title='Lake Level Table',
-              actionButton('update_Lake_Levels', 'Update Lake Levels'),
-              downloadButton('downloadLakeStatus', 'Export Lake Level Table'),
-              tableOutput('lakeTable')
-              ),
-            tabPanel(
-              title='Lake Map',
-              plotOutput('lakeMap') ),
-            tabPanel(
-              title='Lake Level Guide Curves',
-              p("Coming soon")
-              )
-            )
-          ),
+        # tabPanel(
+        #   title='Lakes',
+        #   tabsetPanel(
+        #     tabPanel(
+        #       title='Lake Level Table',
+        #       actionButton('update_Lake_Levels', 'Update Lake Levels'),
+        #       downloadButton('downloadLakeStatus', 'Export Lake Level Table'),
+        #       tableOutput('lakeTable')
+        #       ),
+        #     tabPanel(
+        #       title='Lake Map',
+        #       plotOutput('lakeMap') ),
+        #     tabPanel(
+        #       title='Lake Level Guide Curves',
+        #       p("Coming soon")
+        #       )
+        #     )
+        #   ),
         tabPanel(
           title='Groundwater',
           # p("Coming soon")
